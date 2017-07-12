@@ -1,4 +1,4 @@
-﻿"""
+"""
 -------------------------------------------------------------------------------
  | Copyright 2016 Esri
  |
@@ -166,7 +166,7 @@ class _OverwriteHostedFeatures(object):
 
         config = configparser.ConfigParser()
         if config_file is None:
-            config_file = os.path.join(os.path.dirname(__file__), _DEFAULT_CONFIG_FILENAME)
+            config_file = _DEFAULT_CONFIG_FILENAME # os.path.join(os.path.dirname(__file__), _DEFAULT_CONFIG_FILENAME)
         config.readfp(open(config_file))
 
         log_path = _validate_input(config, 'Log File', 'path', 'path', False)
@@ -584,7 +584,9 @@ def _validate_input(config, group, name, variable_type, required):
         else:
             return None
 
-def make_config():
+def _make_config():
+    """Creates the default configuration file.
+    """
     default_config_text = r"""[Existing ItemIDs]
 featureServiceItemID: bf2e15965c4f457c938d8c0a782caf0c
 featureCollectionItemID: cfb9f0da4d4d4e4cb4e01726152a0952
@@ -617,7 +619,7 @@ isVerbose: false
         with open(_DEFAULT_CONFIG_FILENAME, 'w') as cfg_file:
             cfg_file.write(default_config_text)
 
-def run(config_file=None):
+def run():
     """Overwrite hosted features."""
     parser = argparse.ArgumentParser(description="Overwrites hosted features on ArcGIS Online or ArcGIS Portal.")
     parser.add_argument(
@@ -633,7 +635,7 @@ def run(config_file=None):
 
     if args.generate_config:
         try:
-            make_config()
+            _make_config()
         except FileExistsError:
             sys.stderr.write('"%s" already exists and will not be overwritten.\n' % _DEFAULT_CONFIG_FILENAME)
         exit(0)
@@ -644,8 +646,4 @@ def run(config_file=None):
     overwrite.run(config_file)
 
 if __name__ == "__main__":
-    # CONFIG_FILE = None
-    # if len(sys.argv) > 1:
-    #     CONFIG_FILE = sys.argv[1]
-    # run(CONFIG_FILE)
     run()
