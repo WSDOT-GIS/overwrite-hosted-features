@@ -155,9 +155,9 @@ class _OverwriteHostedFeatures(object):
 
     def _read_config(self, config_file):
         """Read the config and set global variables used in the script.
-        
+
         Keyword arguments:
-        config_file - Path to the configuration file. 
+        config_file - Path to the configuration file.
         If None it will look for a file called overwrite_hosted_features.cfg in the same directory as the executing script.
         """
 
@@ -181,11 +181,11 @@ class _OverwriteHostedFeatures(object):
         feature_collection_id = _validate_input(config, 'Existing ItemIDs', 'featureCollectionItemID', 'id', False)
         if feature_collection_id is not None:
             self._config_options['feature_collection_id'] = feature_collection_id
-        
+
         fgdb = _validate_input(config, 'Data Sources', 'fgdb', 'path', False)
         if fgdb is not None:
             self._config_options['fgdb'] = fgdb
-        
+
         self._config_options['org_url'] = _validate_input(config, 'Portal Sharing URL', 'baseURL', 'url', True)
         self._config_options['username'] = _validate_input(config, 'Portal Credentials', 'username', 'string', True)
         self._config_options['pw'] = _validate_input(config, 'Portal Credentials', 'pw', 'string', True)
@@ -352,7 +352,7 @@ class _OverwriteHostedFeatures(object):
         item = self._url_request(url, request_parameters, error_text='Unable to find feature service with ID: {}'.format(self._config_options['feature_service_id']))
 
         if not item['type'] == 'Feature Service':
-            raise Exception("Item {} is not a feature service".format(self._config_options['feature_service_id'])) 
+            raise Exception("Item {} is not a feature service".format(self._config_options['feature_service_id']))
 
         self._config_options['basename'] = item['title']
 
@@ -361,7 +361,7 @@ class _OverwriteHostedFeatures(object):
             item = self._url_request(url, request_parameters, error_text='Unable to find feature collection with ID: {}'.format(self._config_options['feature_collection_id']))
 
             if not item['type'] == 'Feature Collection':
-                raise Exception("Item {} is not a feature collection".format(self._config_options['feature_collection_id'])) 
+                raise Exception("Item {} is not a feature collection".format(self._config_options['feature_collection_id']))
 
             self._config_options['temp_fc_name'] = item['title'] + "_temp"
             self._config_options['owner_folder'] = item['ownerFolder']
@@ -381,7 +381,7 @@ class _OverwriteHostedFeatures(object):
         Keyword arguments:
         gdb_name - the name of the geodatabase"""
         url = '{0}sharing/rest/search'.format(self._config_options['org_url'])
-        request_parameters = {'f' : 'json', 'q' : 'OverwriteHostedFeatures owner:{0} type:"File Geodatabase"'.format(self._config_options['username']), 
+        request_parameters = {'f' : 'json', 'q' : 'OverwriteHostedFeatures owner:{0} type:"File Geodatabase"'.format(self._config_options['username']),
                               'token' : self._config_options['token']}
         response = self._url_request(url, request_parameters, error_text='Failed to upload file geodatabase')
         results = response['results']
@@ -405,7 +405,7 @@ class _OverwriteHostedFeatures(object):
             raise Exception("File geodatabase {} could not be found".format(fgdb))
         gdb_name = os.path.basename(fgdb)
         self._log_message("Uploading file geodatabase {}".format(fgdb))
-    
+
         try:
             request_parameters = {'f' : 'json', 'token' : self._config_options['token'], 'tags' : 'OverwriteHostedFeatures',
                                   'itemType' : 'file', 'async' : False,
@@ -420,7 +420,7 @@ class _OverwriteHostedFeatures(object):
             self._log_message("Failed to upload file geodatabase. Searching the portal for a file geodatabase with the same name")
             self._find_and_delete_gdb(gdb_name)
             response = self._url_request(url, request_parameters, files=files, error_text='Failed to upload file geodatabase')
-    
+
         self._config_options['gdb_item_id'] = response['id']
         self._log_message("File geodatabase upload complete")
 
@@ -440,8 +440,8 @@ class _OverwriteHostedFeatures(object):
         feature_service = self._url_request(fs_url, request_parameters, repeat=2, error_text='Unable to get JSON definition of feature service')
         publish_params = feature_service
         publish_params['name'] = os.path.basename(os.path.dirname(fs_url))
-        
-        layers = self._url_request(fs_url + "/layers", request_parameters, repeat=2, error_text='Unable to get JSON definition of feature service layers')                           
+
+        layers = self._url_request(fs_url + "/layers", request_parameters, repeat=2, error_text='Unable to get JSON definition of feature service layers')
         publish_params['layers'] = layers['layers']
         publish_params['tables'] = layers['tables']
 
@@ -451,19 +451,19 @@ class _OverwriteHostedFeatures(object):
                 if lyr is not None:
                     lyr['name'] = mapping[1]
 
-        #Need to pass the C encoding for '<' and '>', otherwise publish fails.        
+        #Need to pass the C encoding for '<' and '>', otherwise publish fails.
         publish_params_json = json.dumps(publish_params).replace('<', '\\u003c').replace('>', '\\u003e')
-        
+
         attempt_count = 2
         for i in range(attempt_count):
-            try:         
+            try:
                 url = '{0}sharing/rest/content/users/{1}/publish'.format(org_url, self._config_options['username'])
                 request_parameters = {'f' : 'json', 'token' : self._config_options['token'],
                                       'publishParameters' : publish_params_json, 'itemID' : self._config_options['gdb_item_id'],
                                       'overwrite' : True, 'fileType' : 'fileGeodatabase'}
                 response = self._url_request(url, request_parameters, "POST", error_text='Failed to update {} feature service'.format(basename))
                 if 'services' not in response:
-                    raise Exception("Failed to update {0} feature service: {1}".format(basename, response))      
+                    raise Exception("Failed to update {0} feature service: {1}".format(basename, response))
                 service = response['services'][0]
                 if 'jobId' not in service:
                     raise Exception("Failed to update {0} feature service: {1}".format(basename, response))
@@ -471,10 +471,10 @@ class _OverwriteHostedFeatures(object):
                 break
             except Exception as ex:
                 ex.args = ("Attempt {0}: {1}".format(i+1, str(ex)),)
-                if i+1 == attempt_count:              
+                if i+1 == attempt_count:
                     raise ex
                 self._log_message(str(ex))
-                    
+
         self._log_message("{} feature service updated".format(basename))
 
     def _update_feature_collection(self):
@@ -499,7 +499,7 @@ class _OverwriteHostedFeatures(object):
                                       'overwrite' : True, 'resultItemId' : feature_collection_id}
 
                 response = self._url_request(url, request_parameters, "POST", raise_on_failure=False)
-    
+
                 if 'jobId' not in response:
                     raise Exception("Failed to export temporary feature collection: {0}".format(response))
 
@@ -507,7 +507,7 @@ class _OverwriteHostedFeatures(object):
                 break
             except Exception as ex:
                 ex.args = ("Attempt {0}: {1}".format(i+1, str(ex)),)
-                if i+1 == attempt_count:              
+                if i+1 == attempt_count:
                     raise ex
                 self._log_message(str(ex))
 
@@ -521,7 +521,7 @@ class _OverwriteHostedFeatures(object):
         url = '{0}sharing/rest/content/users/{1}/items/{2}/update'.format(org_url, user_folder, self._config_options['feature_collection_id'])
         request_parameters = {'f' : 'json', 'token' : self._config_options['token'], 'snippet' : str(date)}
         self._url_request(url, request_parameters, "POST", repeat=2, error_text='Failed to update feature collection')
-        
+
         self._log_message("Feature collection updated")
 
     def _remove_temp_content(self):
@@ -535,7 +535,7 @@ class _OverwriteHostedFeatures(object):
 
     def run(self, config_file):
         """Overwrite hosted features."""
-        try:         
+        try:
             self._read_config(config_file)
             self._config_options['token'] = self._get_token()
             self._get_published_items()
