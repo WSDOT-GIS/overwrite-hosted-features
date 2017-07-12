@@ -16,6 +16,7 @@
  ------------------------------------------------------------------------------
  """
 import datetime, time, os, sys, traceback, gzip, json, email.generator, mimetypes, shutil, io
+import argparse
 
 try:
     from urllib.request import urlopen as urlopen
@@ -30,6 +31,8 @@ except ImportError:
     from urllib import urlencode as encode
     import ConfigParser as configparser
     from cStringIO import StringIO
+
+_DEFAULT_CONFIG_FILENAME = 'overwrite_hosted_features.cfg'
 
 class _MultiPartForm(object):
     """Accumulate the data to be used when posting a form."""
@@ -163,7 +166,7 @@ class _OverwriteHostedFeatures(object):
 
         config = configparser.ConfigParser()
         if config_file is None:
-            config_file = os.path.join(os.path.dirname(__file__), 'overwrite_hosted_features.cfg')
+            config_file = os.path.join(os.path.dirname(__file__), _DEFAULT_CONFIG_FILENAME)
         config.readfp(open(config_file))
 
         log_path = _validate_input(config, 'Log File', 'path', 'path', False)
@@ -581,15 +584,68 @@ def _validate_input(config, group, name, variable_type, required):
         else:
             return None
 
+def make_config():
+    default_config_text = r"""[Existing ItemIDs]
+featureServiceItemID: bf2e15965c4f457c938d8c0a782caf0c
+featureCollectionItemID: cfb9f0da4d4d4e4cb4e01726152a0952
+
+[Data Sources]
+fgdb: D:\Data\StateGovernment.gdb.zip
+
+[Portal Sharing URL]
+baseURL: http://yourorganization.maps.arcgis.com/
+
+[Portal Credentials]
+username: username
+pw: password
+
+[Generalization]
+maxAllowableOffset: 100
+
+[Layers]
+nameMapping: WidthHeightAlerts,WidthHeightAlerts;WorkZones WidthHeight,WorkZonesWidthHeight;WorkZones,WorkZones;Alerts Severe,AlertsSevere;Alerts NonSevere,AlertsNonSevere;Windspeed,Windspeed;Cameras,WebCameras;Closed Roads,RoadConditionsClosed;RoadConditions,RoadConditionsOpen
+
+[Log File]
+path: D:\Data\OverwriteLog.txt
+isVerbose: false
+"""
+    # Raise error if file already exists to avoid overwriting existing config.
+    # Otherwise, write the configuration file.
+    if os.path.exists(_DEFAULT_CONFIG_FILENAME):
+        raise FileExistsError(_DEFAULT_CONFIG_FILENAME)
+    else:
+        with open(_DEFAULT_CONFIG_FILENAME, 'w') as cfg_file:
+            cfg_file.write(default_config_text)
+
 def run(config_file=None):
     """Overwrite hosted features."""
+    parser = argparse.ArgumentParser(description="Overwrites hosted features on ArcGIS Online or ArcGIS Portal.")
+    parser.add_argument(
+        "config_file", type=str,
+        help="Path to configuration file. Can be omitted if a %s file exists in the current directory." % _DEFAULT_CONFIG_FILENAME,
+        nargs="?")
+    parser.add_argument(
+        "--generate-config", action="store_true",
+        help='Use this flag to generate a "%s" file in the current directory' % _DEFAULT_CONFIG_FILENAME)
+
+
+    args = parser.parse_args()
+
+    if args.generate_config:
+        try:
+            make_config()
+        except FileExistsError:
+            sys.stderr.write('"%s" already exists and will not be overwritten.\n' % _DEFAULT_CONFIG_FILENAME)
+        exit(0)
+
+    config_file = args.config_file
+
     overwrite = _OverwriteHostedFeatures()
     overwrite.run(config_file)
 
 if __name__ == "__main__":
-    CONFIG_FILE = None
-    if len(sys.argv) > 1:
-        CONFIG_FILE = sys.argv[1]
-    run(CONFIG_FILE)
-
-
+    # CONFIG_FILE = None
+    # if len(sys.argv) > 1:
+    #     CONFIG_FILE = sys.argv[1]
+    # run(CONFIG_FILE)
+    run()
