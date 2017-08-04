@@ -14,7 +14,7 @@ Requirements
 ------------
 
 <!-- Start using this this tool now by downloading this repository as a .zip file and unzip to a suitable location or clone the repository with a git tool.  Requirements for using the script include -->
-* Python version 2.7.x or version 3.4.  If you are using Python 2.7.8 or earlier, download and install [pip](http://links.esri.com/thirdparty/pipInstall).
+* Python version 2.7.x or version 3.4.  If you are using Python 2.7.8 or earlier, download and install [pip].
 * A zipped file geodatabase containing data with which the Feature Collection will be updated
 * The URL to your ArcGIS Online Organization, and the username and password for the owner of the feature service and feature collection
 
@@ -89,6 +89,11 @@ Contributing
 Esri welcomes contributions from anyone and everyone.
 Please see our [guidelines for contributing].
 
+For package maintainers
+-----------------------
+
+Use the `build.py` script to create the pacakge files for use with [PyPI].
+
 Licensing
 ----------
 
@@ -111,6 +116,7 @@ A copy of the license is available in the repository's
 
 [Transportation 511]:http://links.esri.com/stategovernment/help/transportation511
 [pip]:http://links.esri.com/thirdparty/pipInstall
+[PyPI]:https://pypi.python.org/
 [ArcGIS for State Government maps and apps]:http://solutions.arcgis.com
 [State Government GitHub repositories]:http://esri.github.io/#State-Government
 [information and sample data]:http://links.esri.com/stategovernment/help/Transportation511

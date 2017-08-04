@@ -43,6 +43,8 @@ setup(
     url="https://github.com/Esri/overwrite-hosted-features",
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, <4',
+    # This will generate executable scripts (and wrapper executable files
+    # on Windows) upon installation.
     entry_points={
         'console_scripts': [
             'update511=esri511.overwrite_hosted_features:run'

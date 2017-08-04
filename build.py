@@ -1,4 +1,4 @@
-"""Builds the installers
+"""Builds the packages
 """
 from os import remove
 from subprocess import check_call
