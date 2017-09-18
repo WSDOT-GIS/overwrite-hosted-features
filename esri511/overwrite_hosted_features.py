@@ -384,14 +384,17 @@ class _OverwriteHostedFeatures(object):
         Keyword arguments:
         gdb_name - the name of the geodatabase"""
         url = '{0}sharing/rest/search'.format(self._config_options['org_url'])
-        request_parameters = {'f' : 'json', 'q' : 'OverwriteHostedFeatures owner:{0} type:"File Geodatabase"'.format(self._config_options['username']),
+        request_parameters = {'f' : 'json', 'q' : 'owner:{0} type:"File Geodatabase"'.format(self._config_options['username']),
                               'token' : self._config_options['token']}
         response = self._url_request(url, request_parameters, error_text='Failed to upload file geodatabase')
         results = response['results']
-        existing_gdb = next((r['id'] for r in results if r['name'] == gdb_name and "OverwriteHostedFeatures" in r['tags']), None)
+        existing_gdb = next((r['id'] for r in results if r['name'] == gdb_name), None)
         if existing_gdb is None:
-            self._log_message("Failed to find file geodatabase on the portal named {0}: {1}".format(gdb_name, response))
             return
+        else:
+            existing_gdb_tags = next((r['tags'] for r in results if r['id'] == existing_gdb), None)
+            if not "OverwriteHostedFeatures" in existing_gdb_tags:
+                raise Exception("A file geodatabase on the portal named {0} already exists.".format(gdb_name))
 
         self._log_message("File geodatabase {} found on the portal, deleting the item".format(gdb_name))
         response = self._delete_item(existing_gdb)
@@ -408,6 +411,8 @@ class _OverwriteHostedFeatures(object):
             raise Exception("File geodatabase {} could not be found".format(fgdb))
         gdb_name = os.path.basename(fgdb)
         self._log_message("Uploading file geodatabase {}".format(fgdb))
+
+        self._find_and_delete_gdb(gdb_name)
 
         try:
             request_parameters = {'f' : 'json', 'token' : self._config_options['token'], 'tags' : 'OverwriteHostedFeatures',
