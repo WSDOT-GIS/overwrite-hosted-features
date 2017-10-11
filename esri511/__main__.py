@@ -543,6 +543,7 @@ class _OverwriteHostedFeatures(object):
 
     def run(self, config_file):
         """Overwrite hosted features."""
+        error_code = 0
         try:
             self._read_config(config_file)
             self._config_options['token'] = self._get_token()
@@ -554,9 +555,11 @@ class _OverwriteHostedFeatures(object):
                 self._update_feature_collection()
         except Exception:
             self._log_error()
+            error_code = 1
         finally:
             self._remove_temp_content()
             self._end_logging()
+        return error_code
 
 def _validate_input(config, group, name, variable_type, required):
     """Validates and returns the correspoinding value defined in the config.
@@ -648,7 +651,9 @@ def run():
     config_file = args.config_file
 
     overwrite = _OverwriteHostedFeatures()
-    overwrite.run(config_file)
+    error_code = overwrite.run(config_file)
+    if error_code:
+        exit(error_code)
 
 if __name__ == "__main__":
     run()

@@ -18,7 +18,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='esri511',
-    version="2.0.1",
+    version="2.0.2",
     description="ESRI Transportation 511 Feature Collection update script",
     long_description=long_description,
     license="Apache",
@@ -47,7 +47,7 @@ setup(
     # on Windows) upon installation.
     entry_points={
         'console_scripts': [
-            'update511=esri511.overwrite_hosted_features:run'
+            'update511=esri511.__main__:run'
         ]
     }
 )

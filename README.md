@@ -44,30 +44,32 @@ For more details, see https://pip.pypa.io/en/latest/reference/pip_install/#vcs-s
 
 ### Create Configuration ###
 
-Once you have installed the package using [pip], you can generate a configuration file using the follwing command. The configuration file will be created in the current working directory.
+Once you have installed the package using [pip], you can generate a configuration file using the following command. The configuration file will be created in the current working directory.
 
 ```console
 update511 --generate-config
 ```
 
+or
+
+```console
+python -m esri511 --generate-config
+```
+
 Usage
 -----
 
-    usage: update511 [-h] [--generate-config] [config_file]
+Use one of the following commands to get help
 
-    Overwrites hosted features on ArcGIS Online or ArcGIS Portal.
+```console
+update511 -h
+```
 
-    positional arguments:
-    config_file        Path to configuration file. Can be omitted if a
-                        overwrite_hosted_features.cfg file exists in the current
-                        directory.
+or
 
-    optional arguments:
-    -h, --help         show this help message and exit
-    --generate-config  Use this flag to generate a
-                        "overwrite_hosted_features.cfg" file in the current
-                        directory
-
+```console
+python -m esri511 -h
+```
 
 Resources
 ---------
